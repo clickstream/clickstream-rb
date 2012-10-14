@@ -1,6 +1,6 @@
 require 'rake'
 require 'rake/testtask'
-require File.expand_path('../lib/colombo',  __FILE__)
+require File.expand_path('../lib/columbo', __FILE__)
 
 Rake::TestTask.new(:test) do |test|
   # TODO: add tests
@@ -10,11 +10,11 @@ Rake::TestTask.new(:test) do |test|
 end
 
 task :build do
-  system "gem build colombo.gemspec"
+  system "gem build columbo.gemspec"
 end
 
 task :release => :build do
-  system "gem push colombo-#{Colombo::VERSION}.gem"
+  system "gem push columbo-#{Columbo::VERSION}.gem"
 end
 
 task :default => :test

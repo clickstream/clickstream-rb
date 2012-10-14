@@ -1,6 +1,6 @@
 require 'sinatra/base'
 
-module Colombo
+module Columbo
   class Web < Sinatra::Base
 
   end

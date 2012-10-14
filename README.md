@@ -1,16 +1,13 @@
-# Colombo
+# Columbo
 
-The *colombo* gem includes a simple sinatra web server and a middleware that captures users browsing sessions
-for Rack applications.
+The *columbo* gem goal is to include a middleware that captures users browsing sessions
+for Rack applications and a simple sinatra web server to replay and explore users sessions.
 
-## Disclaimer
-
-This is an early release that has not been tested in production. **Use at your own risk**
-
+Tribute to [Inspector Columbo](http://www.imdb.com/title/tt1466074/)
 
 ## Using with Rack application
 
-*Colombo* can be used with any Rack application,
+*Columbo* can be used with any Rack application,
 for example with a **Sinatra** application.
 If your application includes a rackup file
 or uses *Rack::Builder* to construct the application pipeline, 
@@ -25,7 +22,7 @@ simply require and use as follows:
 In order to use, include the following in a Rails application
 *Gemfile* file:
 
-    gem 'colombo'
+    gem 'columbo'
 
 *config/application.rb* file:
 
@@ -42,5 +39,5 @@ Jerome Touffe-Blin, [@jtblin](https://twitter.com/jtlbin), [http://www.linkedin.
 
 ## License
 
-Colombo is copyright 2012 Jerome Touffe-Blin and contributors. It is licensed under the BSD license. See the include LICENSE file for details.
+Columbo is copyright 2012 Jerome Touffe-Blin and contributors. It is licensed under the BSD license. See the include LICENSE file for details.
 

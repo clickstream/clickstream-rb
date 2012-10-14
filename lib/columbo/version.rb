@@ -1,3 +1,3 @@
-module Colombo
+module Columbo
   VERSION = "0.0.1"
 end

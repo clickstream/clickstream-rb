@@ -1,14 +1,14 @@
 # -*- encoding: utf-8 -*-
-require File.expand_path('../lib/colombo',  __FILE__)
+require File.expand_path('../lib/columbo', __FILE__)
 
 Gem::Specification.new do |s|
-  s.name = %q{colombo}
-  s.version = Colombo::VERSION
+  s.name = %q{columbo}
+  s.version = Columbo::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors = ["Jerome Touffe-Blin"]
   s.email = %q{jtblin@gmail.com}
-  s.homepage = %q{http://github.com/jtblin/colombo}
-  s.summary = %q{Inspector Colombo}
+  s.homepage = %q{http://github.com/jtblin/columbo}
+  s.summary = %q{Inspector Columbo}
   s.description = %q{Users browsing sessions inspector}
   s.required_rubygems_version = ">= 1.3.6"
   s.add_runtime_dependency(%q<rack>, [">= 1.4.0"])

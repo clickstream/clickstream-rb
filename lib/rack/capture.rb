@@ -1,4 +1,4 @@
-require 'colombo'
+require 'columbo'
 require 'rack/utils'
 require 'rack/logger'
 
@@ -6,7 +6,7 @@ module Rack
   class Capture
     include Rack::Utils
 
-    FORMAT = %{[Colombo #{Colombo::VERSION}] %s - [%s] %s "%s%s %s"\n}
+    FORMAT = %{[Columbo #{Columbo::VERSION}] %s - [%s] %s "%s%s %s"\n}
 
     def initialize(app, opts={})
       @app = app
@@ -37,7 +37,7 @@ module Rack
       end
 
       stop = Time.now and log(env, (stop-start).seconds) if @bench
-      headers['Colombo'] = "version #{Colombo::VERSION}, time #{(stop-start).seconds}s" if @bench
+      headers['Columbo'] = "version #{Columbo::VERSION}, time #{(stop-start).seconds}s" if @bench
 
       [status, headers, response]
     end
