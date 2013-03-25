@@ -1,6 +1,6 @@
-# Columbo
+# columbo-rb
 
-The *columbo* gem goal is to include a middleware
+The *columbo* gem includes a middleware
 that captures users browsing sessions for Rack applications.
 
 Tribute to [Inspector Columbo](http://www.imdb.com/title/tt1466074/)
@@ -13,8 +13,8 @@ If your application includes a rackup file
 or uses *Rack::Builder* to construct the application pipeline, 
 simply require and use as follows:
 
-    require 'rack/capture'
-    use Rack::Capture
+    require 'columbo/capture'
+    use Columbo::Capture
     run app
 
 ## Using with Rails 3
@@ -26,7 +26,7 @@ In order to use, include the following in a Rails application
 
 *config/application.rb* file:
 
-    require 'rack/capture'
+    require 'columbo/capture'
     config.middleware.insert_before ActionDispatch::ShowExceptions, Columbo::Capture, {capture: Rails.env.production?}
 
 Check the Rack configuration:

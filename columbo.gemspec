@@ -7,9 +7,9 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors = ["Jerome Touffe-Blin"]
   s.email = %q{jtblin@gmail.com}
-  s.homepage = %q{http://github.com/jtblin/columbo}
-  s.summary = %q{Inspector Columbo}
-  s.description = %q{Customer Experience Management Ruby client}
+  s.homepage = %q{http://github.com/jtblin/columbo-rb}
+  s.summary = %q{A Ruby client library for Inspector Columbo}
+  s.description = %q{A Ruby client library for Columbo: a Customer Experience Management tool}
   s.required_rubygems_version = ">= 1.3.6"
   s.add_runtime_dependency %q<rack>, [">= 1.4.0"]
   s.add_runtime_dependency %q<nokogiri>, [">= 1.5.9"]
