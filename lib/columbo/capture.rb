@@ -2,7 +2,7 @@ require 'columbo'
 require 'rack/utils'
 require 'rack/logger'
 
-module Rack
+module Columbo
   class Capture
     include Rack::Utils
 
@@ -10,8 +10,10 @@ module Rack
 
     def initialize(app, opts={})
       @app = app
-      @bench = opts[:bench] || true
+      @capture = opts[:capture] || false
+      @bench = (opts[:capture] && opts[:bench]) || false
       @logger = opts[:logger]
+      @inspector = Columbo::Inspector.new
     end
 
     def call(env)
@@ -19,9 +21,11 @@ module Rack
     end
 
     def _call(env)
+      start_processing = Time.now
       status, headers, response = @app.call(env)
+      stop_processing = Time.now
+
       start = Time.now if @bench
-      # TODO: create GUID, capture status, header, set cookie
 
       headers = HeaderHash.new(headers) # Is it required?
 
@@ -30,14 +34,15 @@ module Rack
           headers['content-type'] &&
           headers['content-type'].include?("text/html")
 
-        body = ""
-        response.each { |part| body += part }
+        Thread.new { @inspector.investigate env, status, headers, response, start_processing, stop_processing if @capture }
 
-        # TODO: capture body in DB
       end
 
-      stop = Time.now and log(env, (stop-start).seconds) if @bench
-      headers['Columbo'] = "version #{Columbo::VERSION}, time #{(stop-start).seconds}s" if @bench
+      if @bench
+        stop = Time.now
+        log(env, (stop-start).seconds)
+        headers['Columbo'] = "version #{Columbo::VERSION}, time #{(stop-start).seconds}s"
+      end
 
       [status, headers, response]
     end

@@ -1,7 +1,7 @@
 # Columbo
 
-The *columbo* gem goal is to include a middleware that captures users browsing sessions
-for Rack applications and a simple sinatra web server to replay and explore users sessions.
+The *columbo* gem goal is to include a middleware
+that captures users browsing sessions for Rack applications.
 
 Tribute to [Inspector Columbo](http://www.imdb.com/title/tt1466074/)
 
@@ -27,11 +27,16 @@ In order to use, include the following in a Rails application
 *config/application.rb* file:
 
     require 'rack/capture'
-    config.middleware.insert_before Rack::ETag, Rack::Capture
+    config.middleware.insert_before ActionDispatch::ShowExceptions, Columbo::Capture, {capture: Rails.env.production?}
 
 Check the Rack configuration:
 
     rake middleware
+
+## Disclaimer
+
+This is an alpha release and it is untested with Sinatra, it is tested with Rails 3 only.
+UI to explore sessions will be completed later (ETA: 2013'Q2).
 
 ## Author
 
