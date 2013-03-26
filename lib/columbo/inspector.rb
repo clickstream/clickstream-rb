@@ -45,7 +45,7 @@ module Columbo
           },
           status: status,
           headers: headers,
-          length: html.length,
+          size: html.length,
           body: HtmlMini.minify(html),
           text: text,
           title: title,
