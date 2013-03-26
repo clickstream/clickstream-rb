@@ -10,10 +10,14 @@ module Columbo
 
     def initialize(app, opts={})
       @app = app
-      @capture = opts[:capture] || false
-      @bench = (opts[:capture] && opts[:bench]) || false
-      @logger = opts[:logger]
-      @inspector = Columbo::Inspector.new
+      @capture    = opts[:capture] || false
+      @bench      = (opts[:capture] && opts[:bench]) || false
+      @logger     = opts[:logger]
+      @mongo_uri  = opts[:mongo_uri]
+
+      raise ArgumentError, 'mongo URI missing.' if @mongo_uri.nil?
+
+      @inspector = Columbo::Inspector.new @mongo_uri
     end
 
     def call(env)

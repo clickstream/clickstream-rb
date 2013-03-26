@@ -6,12 +6,13 @@ require 'html_mini'
 module Columbo
   class Inspector
 
-    def initialize
+    def initialize(mongo_uri)
+      @mongo_uri = mongo_uri
     end
 
     def investigate(env, status, headers, body, start, stop)
       # Lazy connection to MongoDB
-      client = Columbo::DbClient.new
+      client = Columbo::DbClient.new @mongo_uri
       # Normalise request from env
       request = Rack::Request.new(env)
       html = ''

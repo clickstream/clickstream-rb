@@ -6,9 +6,9 @@ module Columbo
 
     attr_accessor :coll
 
-    def initialize
-      client = Mongo::MongoClient.from_uri(Columbo::MONGO_URI)
-      db     = client[Columbo::MONGO_DB]
+    def initialize(uri)
+      client = Mongo::MongoClient.from_uri(uri)
+      db = client[uri.split('/').last]
       @coll  = db[Columbo::MONGO_COLLECTION]
     end
 

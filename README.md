@@ -27,7 +27,11 @@ In order to use, include the following in a Rails application
 *config/application.rb* file:
 
     require 'columbo/capture'
-    config.middleware.insert_before ActionDispatch::ShowExceptions, Columbo::Capture, {capture: Rails.env.production?}
+    config.middleware.insert_before ActionDispatch::ShowExceptions, Columbo::Capture, {
+      capture: Rails.env.production?,
+      bench: true,
+      mongo_uri: 'mongodb://user:password@mongodb_host:port/database'
+    }
 
 Check the Rack configuration:
 
