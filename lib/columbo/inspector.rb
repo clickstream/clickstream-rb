@@ -54,17 +54,34 @@ module Columbo
           time: stop-start
       }
       # Insert data in MongoDB
-      client.insert data
+      # TODO: error logging
+      client.insert sanitize(data)
     end
 
     def to_plain_text(html)
       html_doc = Nokogiri::HTML(html)
       html_doc.xpath('//script').each {|node| node.remove}
       html_doc.xpath('//style').each {|node| node.remove}
-      text = ""
+      text = ''
       html_doc.xpath('//body').each {|node| text += node.text.gsub(/\s{2,}/, ' ')}
       title = html_doc.xpath('//title').first.text
       [text, title]
+    end
+    
+    private
+
+    def sanitize(data)
+      Hash[
+        data.map do |key, value|
+          value = sanitize(value) if value.is_a? Hash
+          # replace $ and . in keys by Unicode full width equivalent
+          # http://docs.mongodb.org/manual/faq/developers/#faq-dollar-sign-escaping
+          key = key.gsub('.', 'U+FF0E').gsub('$', 'U+FF04') if key.is_a? String
+          # transform symbol into string to avoid auto transformation into $symbol
+          value = value.to_s if value.is_a? Symbol
+          [key, value]
+        end
+      ]
     end
 
   end
