@@ -1,6 +1,6 @@
 require 'rake'
 require 'rake/testtask'
-require File.expand_path('../lib/columbo', __FILE__)
+require File.expand_path('../lib/columbo/version', __FILE__)
 
 Rake::TestTask.new(:test) do |test|
   # TODO: add tests
