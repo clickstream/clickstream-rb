@@ -22,8 +22,6 @@ module Columbo
       # Get request headers
       request_headers = {}
       request.env.each { |key, value| request_headers[key.sub(/^HTTP_/, '').downcase] = value if key.start_with? 'HTTP_'}
-      # Convert MIME types into String
-      formats = request.env['action_dispatch.request.formats'].collect {|format| format.to_s}
       data = {
           request: {
               params: request.params,
@@ -40,7 +38,6 @@ module Columbo
               http: request.env['SERVER_PROTOCOL'],
               session: request.env['rack.session'],
               cookie: request.env['rack.request.cookie_hash'],
-              formats: formats,
               path_parameters: request.env['action_dispatch.request.path_parameters'],
               headers: request_headers
           },
