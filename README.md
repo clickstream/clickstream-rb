@@ -13,13 +13,13 @@ If your application includes a rackup file
 or uses *Rack::Builder* to construct the application pipeline, 
 simply require and use as follows:
 
-    require 'columbo/capture', {
+    require 'columbo/capture'
+    use Columbo::Capture, {
       capture: true,
       bench: false,
       mongo_uri: 'mongodb://user:password@mongodb_host:port/database',
       logger: 'log/columbo.log'
     }
-    use Columbo::Capture
     run app
 
 ## Using with Rails 3
