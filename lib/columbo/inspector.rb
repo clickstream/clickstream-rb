@@ -61,7 +61,8 @@ module Columbo
       html_doc.xpath('//style').each {|node| node.remove}
       text = ''
       html_doc.xpath('//body').each {|node| text += node.text.gsub(/\s{2,}/, ' ')}
-      title = html_doc.xpath('//title').first.try(:text)
+      title_tag = html_doc.xpath('//title').first
+      title = title_tag.nil? ? nil : title_tag.text
       [text, title]
     end
     

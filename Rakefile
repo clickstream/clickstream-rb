@@ -13,6 +13,10 @@ task :build do
   system "gem build columbo.gemspec"
 end
 
+task :install => :build do
+  system "gem install columbo-#{Columbo::VERSION}.gem"
+end
+
 task :release => :build do
   system "gem push columbo-#{Columbo::VERSION}.gem"
 end
