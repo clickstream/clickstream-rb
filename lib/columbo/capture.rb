@@ -6,14 +6,15 @@ module Columbo
   class Capture
     include Rack::Utils
 
-    FORMAT = %{[Columbo #{Columbo::VERSION}] %s - [%s] %s "%s%s %s"\n}
+    FORMAT = %{[Columbo #{Columbo::VERSION}] [%s] %s - %s "%s%s %s\n}
 
     def initialize(app, opts={})
       @app = app
-      @capture    = opts[:capture] || false
-      @bench      = (opts[:capture] && opts[:bench]) || false
-      @logger     = opts[:logger]
+      @capture    = opts[:capture]
+      @bench      = opts[:capture] && opts[:bench]
       @mongo_uri  = opts[:mongo_uri]
+
+      Columbo.logger = opts[:logger] if opts[:logger]
 
       raise ArgumentError, 'mongo URI missing.' if @mongo_uri.nil?
 
@@ -38,14 +39,23 @@ module Columbo
           headers['content-type'] &&
           headers['content-type'].include?("text/html")
 
-        Thread.new { @inspector.investigate env, status, headers, response, start_processing, stop_processing if @capture }
+        Thread.abort_on_exception = true
+
+        Thread.new do
+          begin
+            @inspector.investigate env, status, headers, response, start_processing, stop_processing
+          rescue Exception => e
+            log_error env, e
+          end
+        end if @capture
 
       end
 
       if @bench
         stop = Time.now
-        log(env, (stop-start).seconds)
-        headers['Columbo'] = "version #{Columbo::VERSION}, time #{(stop-start).seconds}s"
+        duration = ((stop-start).seconds * 1000).round(3)
+        log(env, "Time: #{duration}ms")
+        headers['Columbo'] = "version #{Columbo::VERSION}, time #{duration}ms"
       end
 
       [status, headers, response]
@@ -53,18 +63,27 @@ module Columbo
 
     private
 
-    def log(env, time)
+    def log(env, message)
       now = Time.now
-      logger = @logger || env['rack.errors']
+
+      logger = Columbo.logger || env['rack.errors']
 
       logger.write FORMAT % [
-          "Time: #{time}s",
-          now.strftime("%d-%b-%Y %H:%M:%S"),
-          env["REQUEST_METHOD"],
-          env["PATH_INFO"],
-          env["QUERY_STRING"].empty? ? "" : "?"+env["QUERY_STRING"],
-          env["HTTP_VERSION"]
+          now.strftime('%d-%b-%Y %H:%M:%S'),
+          message,
+          env['REQUEST_METHOD'],
+          env['PATH_INFO'],
+          env['QUERY_STRING'].empty? ? '' : '?' + env['QUERY_STRING'],
+          env['HTTP_VERSION']
       ]
+    end
+
+    def log_error(env, exception)
+      begin
+        logger = Columbo.logger || env['rack.errors']
+        log env, "Error: " + exception.message
+        logger.write "#{exception.backtrace.join("\n")}\n"
+      end
     end
 
   end

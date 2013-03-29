@@ -55,7 +55,6 @@ module Columbo
           time: stop-start
       }
       # Insert data in MongoDB
-      # TODO: error logging
       client.insert sanitize(data)
     end
 

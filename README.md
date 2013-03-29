@@ -13,7 +13,12 @@ If your application includes a rackup file
 or uses *Rack::Builder* to construct the application pipeline, 
 simply require and use as follows:
 
-    require 'columbo/capture'
+    require 'columbo/capture', {
+      capture: true,
+      bench: false,
+      mongo_uri: 'mongodb://user:password@mongodb_host:port/database',
+      logger: 'log/columbo.log'
+    }
     use Columbo::Capture
     run app
 
@@ -29,8 +34,9 @@ In order to use, include the following in a Rails application
     require 'columbo/capture'
     config.middleware.insert 0, Columbo::Capture, {
       capture: Rails.env.production?,
-      bench: true,
-      mongo_uri: 'mongodb://user:password@mongodb_host:port/database'
+      bench: false,
+      mongo_uri: 'mongodb://user:password@mongodb_host:port/database',
+      logger: 'log/columbo.log'
     }
 
 Check the Rack configuration:
