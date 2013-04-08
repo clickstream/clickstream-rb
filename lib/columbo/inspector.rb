@@ -10,11 +10,14 @@ module Columbo
       @mongo_uri = mongo_uri
     end
 
-    def investigate(env, status, headers, body, start, stop)
+    def investigate(env, status, headers, body, start, stop, crawlers, capture_crawlers)
       # Lazy connection to MongoDB
       client = Columbo::DbClient.new @mongo_uri
       # Normalise request from env
       request = Rack::Request.new(env)
+      # Don't capture bots traffic by default
+      rg = Regexp.new(crawlers, Regexp::IGNORECASE)
+      return if request.user_agent.match(rg) && !capture_crawlers
       html = ''
       body.each { |part| html += part }
       # Retrieve plain text body for full text search

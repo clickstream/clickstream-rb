@@ -10,9 +10,12 @@ module Columbo
 
     def initialize(app, opts={})
       @app = app
-      @capture    = opts[:capture]
-      @bench      = opts[:capture] && opts[:bench]
-      @mongo_uri  = opts[:mongo_uri]
+      # Options
+      @capture          = opts[:capture]
+      @bench            = opts[:capture] && opts[:bench]
+      @capture_crawlers = opts[:capture_crawlers]
+      @crawlers         = opts[:crawlers] || "(Baidu|Gigabot|Googlebot|libwww-perl|lwp-trivial|msnbot|SiteUptime|Slurp|WordPress|ZIBB|ZyBorg|bot|crawler|spider|robot|crawling|facebook|w3c|coccoc)"
+      @mongo_uri        = opts[:mongo_uri]
 
       Columbo.logger = opts[:logger] if opts[:logger]
 
@@ -43,7 +46,7 @@ module Columbo
 
         Thread.new do
           begin
-            @inspector.investigate env, status, headers, response, start_processing, stop_processing
+            @inspector.investigate env, status, headers, response, start_processing, stop_processing, @crawlers, @capture_crawlers
           rescue Exception => e
             log_error env, e
           end
