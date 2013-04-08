@@ -45,7 +45,7 @@ Check the Rack configuration:
 
 ## Disclaimer
 
-This is an alpha release, it is untested with Sinatra and Rails 3 only.
+This is an alpha release, it is tested with Sinatra and Rails 3 only.
 UI to explore sessions will be completed later (ETA: 2013'Q2).
 
 ## Author
