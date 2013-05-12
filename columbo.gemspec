@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency %q<mongo>, [">= 1.6.1"]
   s.add_runtime_dependency %q<bson_ext>, [">= 1.6.1"]
   #s.add_development_dependency %q<rack-test>, [">= 0.3.0"]
+  s.add_development_dependency %q<sinatra>, [">= 1.3.0"]
 
   s.extra_rdoc_files = [
     "LICENSE",

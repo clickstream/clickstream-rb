@@ -14,7 +14,7 @@ module Columbo
       @capture          = opts[:capture]
       @bench            = opts[:capture] && opts[:bench]
       @capture_crawlers = opts[:capture_crawlers]
-      @crawlers         = opts[:crawlers] || "(Baidu|Gigabot|Googlebot|libwww-perl|lwp-trivial|msnbot|SiteUptime|Slurp|WordPress|ZIBB|ZyBorg|bot|crawler|spider|robot|crawling|facebook|w3c|coccoc)"
+      @crawlers         = opts[:crawlers] || "(Baidu|Gigabot|Googlebot|libwww-perl|lwp-trivial|msnbot|SiteUptime|Slurp|WordPress|ZIBB|ZyBorg|bot|crawler|spider|robot|crawling|facebook|w3c|coccoc|Daumoa)"
       @mongo_uri        = opts[:mongo_uri]
 
       Columbo.logger = opts[:logger] if opts[:logger]
