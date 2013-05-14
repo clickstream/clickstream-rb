@@ -17,7 +17,7 @@ simply require and use as follows:
     use Columbo::Capture, {
       capture: true,
       bench: false,
-      mongo_uri: 'mongodb://user:password@mongodb_host:port/database',
+      apy_key: 'your-private-api-key',
       logger: 'log/columbo.log'
     }
     run app
@@ -35,7 +35,7 @@ In order to use, include the following in a Rails application
     config.middleware.insert 0, Columbo::Capture, {
       capture: Rails.env.production?,
       bench: false,
-      mongo_uri: 'mongodb://user:password@mongodb_host:port/database',
+      apy_key: 'your-private-api-key',
       logger: 'log/columbo.log'
     }
 

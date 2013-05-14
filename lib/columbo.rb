@@ -1,11 +1,10 @@
 require 'columbo/version'
-require 'columbo/db_client'
+require 'columbo/api_client'
 require 'columbo/inspector'
 require 'columbo/log_writer'
+require 'columbo/compressor'
 
 module Columbo
-  MONGO_COLLECTION = "hits".freeze
-
   def self.logger
     @logger
   end

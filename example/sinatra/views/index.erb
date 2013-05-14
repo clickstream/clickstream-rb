@@ -5,7 +5,7 @@
     body {
       font-family: Georgia;
       font-size: 24px;
-      text-align: center;
+      text-align: left;
     }
 
     #headers {
@@ -21,7 +21,13 @@
 <body>
 
 <div id="headers">
-  <h3>Headers:</h3>
+  <h3>Request:</h3>
+
+  <% env.each do |key, value| %>
+    <p><%= key %>: <%= value %></p>
+  <% end %>
+
+  <h3>Response headers:</h3>
 
   <% response.headers.each do |key, value| %>
     <p><%= key %>: <%= value %></p>
