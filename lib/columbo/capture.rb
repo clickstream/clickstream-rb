@@ -56,7 +56,7 @@ module Columbo
 
       if @bench
         stop = Time.now
-        duration = ((stop-start).seconds * 1000).round(3)
+        duration = ((stop-start) * 1000).round(3)
         log(env, "Time: #{duration}ms")
         headers['Columbo'] = "version #{Columbo::VERSION}, time #{duration}ms"
       end
