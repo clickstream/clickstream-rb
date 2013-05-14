@@ -17,7 +17,7 @@ module Columbo
     end
 
     def save(*args)
-      coll.findOne *args
+      coll.save *args
     end
 
     def find(*args)
