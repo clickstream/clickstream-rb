@@ -6,20 +6,18 @@ require 'html_mini'
 module Columbo
   class Inspector
 
-    def initialize(mongo_uri)
-      @mongo_uri = mongo_uri
+    def initialize(api_key, api_uri)
+      @client = Columbo::APIClient.new(api_key, api_uri)
     end
 
     def investigate(env, status, headers, body, start, stop, crawlers, capture_crawlers)
-      # Lazy connection to MongoDB
-      client = Columbo::DbClient.new @mongo_uri
       # Normalise request from env
       request = Rack::Request.new(env)
       # Don't capture bots traffic by default
       rg = Regexp.new(crawlers, Regexp::IGNORECASE)
       return if request.user_agent.match(rg) && !capture_crawlers
       html = ''
-      body.each { |part| html += part }
+      body.each { |part| html += Columbo::Compressor.unzip(part, headers['Content-Encoding']) }
       # Retrieve plain text body for full text search
       text, title = to_plain_text(html)
       # Get request headers
@@ -44,18 +42,20 @@ module Columbo
               path_parameters: request.env['action_dispatch.request.path_parameters'],
               headers: request_headers
           },
-          status: status,
-          headers: headers,
-          size: html.length,
-          body: HtmlMini.minify(html),
-          text: text,
-          title: title,
-          start: start,
-          stop: stop,
-          time: stop-start
+          response: {
+              status: status,
+              headers: headers,
+              size: html.length,
+              body: HtmlMini.minify(html),
+              text: text,
+              title: title,
+              start: start,
+              stop: stop,
+              time: stop-start
+          }
       }
-      # Insert data in MongoDB
-      client.insert sanitize(data)
+      # Send data to API
+      @client.post_data data
     end
 
     def to_plain_text(html)
@@ -67,22 +67,6 @@ module Columbo
       title_tag = html_doc.xpath('//title').first
       title = title_tag.nil? ? nil : title_tag.text
       [text, title]
-    end
-    
-    private
-
-    def sanitize(data)
-      Hash[
-        data.map do |key, value|
-          value = sanitize(value) if value.is_a? Hash
-          # replace $ and . in keys by Unicode full width equivalent
-          # http://docs.mongodb.org/manual/faq/developers/#faq-dollar-sign-escaping
-          key = key.gsub('.', 'U+FF0E').gsub('$', 'U+FF04') if key.is_a? String
-          # transform symbol into string to avoid auto transformation into $symbol
-          value = value.to_s if value.is_a? Symbol
-          [key, value]
-        end
-      ]
     end
 
   end

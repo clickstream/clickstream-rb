@@ -14,8 +14,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency %q<rack>, [">= 1.4.0"]
   s.add_runtime_dependency %q<nokogiri>, [">= 1.5.9"]
   s.add_runtime_dependency %q<html_mini>, [">= 0.0.2"]
-  s.add_runtime_dependency %q<mongo>, [">= 1.6.1"]
-  s.add_runtime_dependency %q<bson_ext>, [">= 1.6.1"]
   #s.add_development_dependency %q<rack-test>, [">= 0.3.0"]
   s.add_development_dependency %q<sinatra>, [">= 1.3.0"]
 

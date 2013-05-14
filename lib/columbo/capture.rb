@@ -15,13 +15,14 @@ module Columbo
       @bench            = opts[:capture] && opts[:bench]
       @capture_crawlers = opts[:capture_crawlers]
       @crawlers         = opts[:crawlers] || "(Baidu|Gigabot|Googlebot|libwww-perl|lwp-trivial|msnbot|SiteUptime|Slurp|WordPress|ZIBB|ZyBorg|bot|crawler|spider|robot|crawling|facebook|w3c|coccoc|Daumoa)"
-      @mongo_uri        = opts[:mongo_uri]
+      @api_key          = opts[:api_key]
+      @api_uri          = opts[:api_uri]
 
       Columbo.logger = opts[:logger] if opts[:logger]
 
-      raise ArgumentError, 'mongo URI missing.' if @mongo_uri.nil?
+      raise ArgumentError, 'API key missing.' if @api_key.nil?
 
-      @inspector = Columbo::Inspector.new @mongo_uri
+      @inspector = Columbo::Inspector.new @api_key, @api_uri
     end
 
     def call(env)
@@ -46,7 +47,8 @@ module Columbo
 
         Thread.new do
           begin
-            @inspector.investigate env, status, headers, response, start_processing, stop_processing, @crawlers, @capture_crawlers
+            result = @inspector.investigate env, status, headers, response, start_processing, stop_processing, @crawlers, @capture_crawlers
+            log env, result
           rescue Exception => e
             log_error env, e
           end
@@ -57,8 +59,13 @@ module Columbo
       if @bench
         stop = Time.now
         duration = ((stop-start) * 1000).round(3)
-        log(env, "Time: #{duration}ms")
         headers['Columbo'] = "version #{Columbo::VERSION}, time #{duration}ms"
+
+        Thread.abort_on_exception = false
+
+        Thread.new do
+          log(env, "Time: #{duration}ms")
+        end
       end
 
       [status, headers, response]

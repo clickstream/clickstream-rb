@@ -14,7 +14,7 @@ task :build do
 end
 
 task :install => :build do
-  system "gem install columbo-#{Columbo::VERSION}.gem"
+  system "gem install --no-ri --no-rdoc columbo-#{Columbo::VERSION}.gem"
 end
 
 task :release => :build do
