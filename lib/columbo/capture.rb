@@ -41,11 +41,11 @@ module Columbo
 
       headers = HeaderHash.new(headers) # Is it required?
 
-      # TODO: support xml, json
-      if !STATUS_WITH_NO_ENTITY_BODY.include?(status) &&
-          !headers['transfer-encoding'] &&
-          headers['content-type'] &&
-          headers['content-type'].include?("text/html")
+      if !STATUS_WITH_NO_ENTITY_BODY.include?(status) && !headers['transfer-encoding'] && headers['content-type'] && (
+        headers['content-type'].include?("text/html") ||
+            headers['content-type'].include?("application/json") ||
+            headers['content-type'].include?("application/xml")
+      )
 
         cookie = session_cookie(env, headers)
 
