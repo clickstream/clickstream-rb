@@ -8,35 +8,17 @@
       text-align: left;
     }
 
-    #headers {
+    #lorem {
       font-size: 16px;
-    }
-
-    input {
-      font-size: 24px;
-      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-<div id="headers">
-  <h3>Request:</h3>
-
-  <% env.each do |key, value| %>
-    <p><%= key %>: <%= value %></p>
-  <% end %>
-
-  <h3>Response headers:</h3>
-
-  <% response.headers.each do |key, value| %>
-    <p><%= key %>: <%= value %></p>
-  <% end %>
-
-  <h3>Params:</h3>
-  <% params.each do |key, value| %>
-    <p><%= key %>: <%= value || '(blank)' %></p>
-  <% end %>
+<div id="lorem">
+  <p>
+    <%= Lorem::Base.new('paragraphs', rand(10)+1).output.gsub("\n\n", "</p><p>") %>
+  </p>
 </div>
 </body>
 </html>

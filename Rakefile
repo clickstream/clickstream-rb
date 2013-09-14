@@ -17,6 +17,10 @@ task :install => :build do
   system "gem install --no-ri --no-rdoc columbo-#{Columbo::VERSION}.gem"
 end
 
+task :server do
+  system "cd example/sinatra/; ruby app.rb"
+end
+
 task :release => :build do
   system "gem push columbo-#{Columbo::VERSION}.gem"
 end

@@ -16,6 +16,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency %q<html_mini>, [">= 0.0.2"]
   #s.add_development_dependency %q<rack-test>, [">= 0.3.0"]
   s.add_development_dependency %q<sinatra>, [">= 1.3.0"]
+  s.add_development_dependency %q<lorem>, [">= 0.1.2"]
 
   s.extra_rdoc_files = [
     "LICENSE",
