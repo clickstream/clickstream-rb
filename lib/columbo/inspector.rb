@@ -1,7 +1,5 @@
 require 'rack/request'
 require 'rack/response'
-require 'nokogiri'
-require 'html_mini'
 
 module Columbo
   class Inspector
@@ -17,11 +15,9 @@ module Columbo
       rg = Regexp.new(crawlers, Regexp::IGNORECASE)
       return if request.user_agent.match(rg) && !capture_crawlers
       html = ''
-      # TODO: move to server
+      # in case of gzipping has been done by the app
       body.each { |part| html += Columbo::Compressor.unzip(part, headers['Content-Encoding']) }
-      # Retrieve plain text body for full text search
-      text, title = to_plain_text(html)
-      # Get request headers
+      # TODO: normalize http headers, e.g. user_agent should be user-agent
       request_headers = {}
       request.env.each { |key, value| request_headers[key.sub(/^HTTP_/, '').downcase] = value if key.start_with? 'HTTP_'}
       data = {
@@ -35,10 +31,10 @@ module Columbo
               script: request.env['SCRIPT_NAME'],
               path: request.env['PATH_INFO'],
               query_string: request.env['QUERY_STRING'],
-              protocol: request.env['rack.url_scheme'],
+              scheme: request.env['rack.url_scheme'],
               server_name: request.env['SERVER_NAME'],
               server_port: request.env['SERVER_PORT'],
-              http: request.env['SERVER_PROTOCOL'],
+              protocol: request.env['SERVER_PROTOCOL'],
               session: request.env['rack.session'],
               cookie: request.env['rack.request.cookie_hash'],
               path_parameters: request.env['action_dispatch.request.path_parameters'],
@@ -48,9 +44,7 @@ module Columbo
               status: status,
               headers: headers,
               size: html.length,
-              body: HtmlMini.minify(html),
-              text: text,
-              title: title,
+              body: html,
               start: start,
               stop: stop,
               time: stop-start
@@ -58,17 +52,6 @@ module Columbo
       }
       # Send data to API
       @client.post_data data
-    end
-
-    def to_plain_text(html)
-      html_doc = Nokogiri::HTML(html)
-      html_doc.xpath('//script').each {|node| node.remove}
-      html_doc.xpath('//style').each {|node| node.remove}
-      text = ''
-      html_doc.xpath('//body').each {|node| text += node.text.gsub(/\s{2,}/, ' ')}
-      title_tag = html_doc.xpath('//title').first
-      title = title_tag.nil? ? nil : title_tag.text
-      [text, title]
     end
 
   end

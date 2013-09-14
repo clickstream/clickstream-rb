@@ -1,10 +1,7 @@
 GEM
   remote: http://rubygems.org/
   specs:
-    html_mini (0.0.2)
-      rack (>= 1.4.0)
     lorem (0.1.2)
-    nokogiri (1.5.9)
     rack (1.4.1)
     rack-protection (1.2.0)
       rack
@@ -18,8 +15,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  html_mini
   lorem
-  nokogiri
   rack
   sinatra

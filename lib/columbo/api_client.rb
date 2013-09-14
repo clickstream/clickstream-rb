@@ -29,7 +29,7 @@ module Columbo
 
       start = Time.now
       Net::HTTP.new(uri.host, uri.port).start do |http|
-        response = http.post(@api_uri, payload, headers)
+        response = http.post(uri.request_uri, payload, headers)
 
         stop = Time.now
         duration = ((stop-start) * 1000).round(3)
