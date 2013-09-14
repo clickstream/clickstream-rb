@@ -10,13 +10,14 @@ module Columbo
       @client = Columbo::APIClient.new(api_key, api_uri)
     end
 
-    def investigate(env, status, headers, body, start, stop, crawlers, capture_crawlers)
+    def investigate(env, status, headers, body, start, stop, crawlers, capture_crawlers, cookie)
       # Normalise request from env
       request = Rack::Request.new(env)
       # Don't capture bots traffic by default
       rg = Regexp.new(crawlers, Regexp::IGNORECASE)
       return if request.user_agent.match(rg) && !capture_crawlers
       html = ''
+      # TODO: move to server
       body.each { |part| html += Columbo::Compressor.unzip(part, headers['Content-Encoding']) }
       # Retrieve plain text body for full text search
       text, title = to_plain_text(html)
@@ -24,6 +25,7 @@ module Columbo
       request_headers = {}
       request.env.each { |key, value| request_headers[key.sub(/^HTTP_/, '').downcase] = value if key.start_with? 'HTTP_'}
       data = {
+          uuid: cookie,
           request: {
               params: request.params,
               remote_ip: request.ip,

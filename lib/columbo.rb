@@ -1,5 +1,6 @@
 require 'columbo/version'
 require 'columbo/api_client'
+require 'columbo/capture'
 require 'columbo/inspector'
 require 'columbo/log_writer'
 require 'columbo/compressor'

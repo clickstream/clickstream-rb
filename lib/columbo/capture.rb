@@ -1,6 +1,7 @@
 require 'columbo'
 require 'rack/utils'
 require 'rack/logger'
+require 'securerandom'
 
 module Columbo
   class Capture
@@ -14,15 +15,17 @@ module Columbo
       @capture          = opts[:capture]
       @bench            = opts[:capture] && opts[:bench]
       @capture_crawlers = opts[:capture_crawlers]
-      @crawlers         = opts[:crawlers] || "(Baidu|Gigabot|Googlebot|libwww-perl|lwp-trivial|msnbot|SiteUptime|Slurp|WordPress|ZIBB|ZyBorg|bot|crawler|spider|robot|crawling|facebook|w3c|coccoc|Daumoa)"
+      @crawlers         = opts[:crawlers] || "(Baidu|Gigabot|Googlebot|libwww-perl|lwp-trivial|msnbot|SiteUptime|Slurp|WordPress|ZIBB|ZyBorg|bot|crawler|spider|robot|crawling|facebook|w3c|coccoc|Daumoa|panopta)"
       @api_key          = opts[:api_key]
       @api_uri          = opts[:api_uri]
+      @cookie_name      = opts[:cookie_name] || 'columbo'
 
       Columbo.logger = opts[:logger] if opts[:logger]
 
       raise ArgumentError, 'API key missing.' if @api_key.nil?
 
       @inspector = Columbo::Inspector.new @api_key, @api_uri
+      @cookie_regex = Regexp.new "#{@cookie_name}="
     end
 
     def call(env)
@@ -38,16 +41,19 @@ module Columbo
 
       headers = HeaderHash.new(headers) # Is it required?
 
+      # TODO: support xml, json
       if !STATUS_WITH_NO_ENTITY_BODY.include?(status) &&
           !headers['transfer-encoding'] &&
           headers['content-type'] &&
           headers['content-type'].include?("text/html")
 
+        cookie = session_cookie(env, headers)
+
         Thread.abort_on_exception = true
 
         Thread.new do
           begin
-            result = @inspector.investigate env, status, headers, response, start_processing, stop_processing, @crawlers, @capture_crawlers
+            result = @inspector.investigate env, status, headers, response, start_processing, stop_processing, @crawlers, @capture_crawlers, cookie
             log env, result
           rescue Exception => e
             log_error env, e
@@ -72,6 +78,25 @@ module Columbo
     end
 
     private
+
+    def session_cookie(env, headers)
+      # TODO: only set cookie if not exist and move extract to inspector
+      cookie = extract_cookie(env['HTTP_COOKIE'])
+      cookie = extract_cookie(headers['set-cookie']) if cookie.nil?
+      cookie = set_cookie(headers) if cookie.nil?
+      cookie
+    end
+
+    def extract_cookie(string)
+      return unless string && string.match(@cookie_regex)
+      string.split(';').select { |cookie| cookie.match @cookie_regex }.first.gsub(@cookie_regex, '')
+    end
+
+    def set_cookie(headers)
+      cookie = SecureRandom.uuid
+      Rack::Utils.set_cookie_header!(headers, @cookie_name, cookie)
+      cookie
+    end
 
     def log(env, message)
       now = Time.now
