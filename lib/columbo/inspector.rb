@@ -4,41 +4,59 @@ require 'rack/response'
 module Columbo
   class Inspector
 
-    def initialize(api_key, api_uri)
+    def initialize(api_key, api_uri, crawlers, capture_crawlers, filter_parameters)
       @client = Columbo::APIClient.new(api_key, api_uri)
+      @crawlers, @capture_crawlers, @filter_parameters = crawlers, capture_crawlers, filter_parameters
     end
 
-    def investigate(env, status, headers, body, start, stop, crawlers, capture_crawlers, cookie)
+    def investigate(env, status, headers, body, start, stop, cookie)
       # Normalise request from env
       request = Rack::Request.new(env)
       # Don't capture bots traffic by default
-      rg = Regexp.new(crawlers, Regexp::IGNORECASE)
-      return if request.user_agent.match(rg) && !capture_crawlers
+      rg = Regexp.new(@crawlers, Regexp::IGNORECASE)
+      return if request.user_agent.match(rg) && !@capture_crawlers
       html = ''
       # in case of gzipping has been done by the app
       body.each { |part| html += Columbo::Compressor.unzip(part, headers['Content-Encoding']) }
-      # TODO: normalize http headers, e.g. user_agent should be user-agent
       request_headers = {}
-      request.env.each { |key, value| request_headers[key.sub(/^HTTP_/, '').downcase] = value if key.start_with? 'HTTP_'}
+      request.env.each { |key, value| request_headers[key.sub(/^HTTP_/, '').gsub(/_/, '-').downcase] = value if key.start_with? 'HTTP_'}
+      params = request.params.clone || {}
+      @filter_parameters.each {|param| params[param] = '[FILTERED]' if params[param]}
+      session_opts = request.session_options.clone || {}
+      session_opts.delete :secret
       data = {
           uuid: cookie,
+          filters: @filter_parameters,
           request: {
-              params: request.params,
-              remote_ip: request.ip,
+              params: params,
+              ip: request.ip,
               user_agent: request.user_agent,
-              method: request.env['REQUEST_METHOD'],
+              referer: request.referer,
+              method: request.request_method,
+              path: request.path, # script_name + path_info
+              fullpath: request.fullpath, # "#{path}?#{query_string}"
+              script_name: request.script_name,
+              path_info: request.path_info,
               uri: request.env['REQUEST_URI'],
-              script: request.env['SCRIPT_NAME'],
-              path: request.env['PATH_INFO'],
-              query_string: request.env['QUERY_STRING'],
-              scheme: request.env['rack.url_scheme'],
+              querystring: request.query_string,
+              scheme: request.scheme,
+              host: request.host,
+              port: request.port,
+              url: request.url, # base_url + fullpath
+              base_url: request.base_url, # scheme + host [+ port]
               server_name: request.env['SERVER_NAME'],
               server_port: request.env['SERVER_PORT'],
-              protocol: request.env['SERVER_PROTOCOL'],
-              session: request.env['rack.session'],
-              cookie: request.env['rack.request.cookie_hash'],
+              content_type: request.content_type,
+              content_charset: request.content_charset,
+              media_type: request.media_type,
+              media_type_params: request.media_type_params,
+              protocol: request.env['HTTP_VERSION'],
+              session: request.session,
+              session_options: session_opts,
+              cookies: request.cookies,
               path_parameters: request.env['action_dispatch.request.path_parameters'],
-              headers: request_headers
+              headers: request_headers,
+              xhr: request.xhr? # @env["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest"
           },
           response: {
               status: status,

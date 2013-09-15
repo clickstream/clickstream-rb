@@ -14,17 +14,20 @@ module Columbo
       # Options
       @capture          = opts[:capture]
       @bench            = opts[:capture] && opts[:bench]
-      @capture_crawlers = opts[:capture_crawlers]
-      @crawlers         = opts[:crawlers] || "(Baidu|Gigabot|Googlebot|libwww-perl|lwp-trivial|msnbot|SiteUptime|Slurp|WordPress|ZIBB|ZyBorg|bot|crawler|spider|robot|crawling|facebook|w3c|coccoc|Daumoa|panopta)"
-      @api_key          = opts[:api_key]
-      @api_uri          = opts[:api_uri]
+      capture_crawlers  = opts[:capture_crawlers]
+      crawlers          = opts[:crawlers] || "(Baidu|Gigabot|Googlebot|libwww-perl|lwp-trivial|msnbot|SiteUptime|Slurp|WordPress|ZIBB|ZyBorg|bot|crawler|spider|robot|crawling|facebook|w3c|coccoc|Daumoa|panopta)"
+      api_key           = opts[:api_key]
+      api_uri           = opts[:api_uri]
       @cookie_name      = opts[:cookie_name] || 'columbo'
+      filter_params     = opts[:filter_parameters] || []
+
+      filter_params = Rails.configuration.filter_parameters || [] if defined? Rails
 
       Columbo.logger = opts[:logger] if opts[:logger]
 
-      raise ArgumentError, 'API key missing.' if @api_key.nil?
+      raise ArgumentError, 'API key missing.' if api_key.nil?
 
-      @inspector = Columbo::Inspector.new @api_key, @api_uri
+      @inspector = Columbo::Inspector.new api_key, api_uri, crawlers, capture_crawlers, filter_params
       @cookie_regex = Regexp.new "#{@cookie_name}="
     end
 
@@ -53,7 +56,7 @@ module Columbo
 
         Thread.new do
           begin
-            result = @inspector.investigate env, status, headers, response, start_processing, stop_processing, @crawlers, @capture_crawlers, cookie
+            result = @inspector.investigate env, status, headers, response, start_processing, stop_processing, cookie
             log env, result
           rescue Exception => e
             log_error env, e
