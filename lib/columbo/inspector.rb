@@ -9,7 +9,7 @@ module Columbo
       @crawlers, @capture_crawlers, @filter_parameters = crawlers, capture_crawlers, filter_parameters
     end
 
-    def investigate(env, status, headers, body, start, stop, cookie)
+    def investigate(env, status, headers, body, start, stop, cookie, pid)
       # Normalise request from env
       request = Rack::Request.new(env)
       # Don't capture bots traffic by default
@@ -25,7 +25,8 @@ module Columbo
       session_opts = request.session_options.clone || {}
       session_opts.delete :secret
       data = {
-          uuid: cookie,
+          sid: cookie,
+          pid: pid,
           filters: @filter_parameters,
           request: {
               params: params,
@@ -56,7 +57,7 @@ module Columbo
               cookies: request.cookies,
               path_parameters: request.env['action_dispatch.request.path_parameters'],
               headers: request_headers,
-              xhr: request.xhr? # @env["HTTP_X_REQUESTED_WITH"] == "XMLHttpRequest"
+              xhr: request.xhr?
           },
           response: {
               status: status,

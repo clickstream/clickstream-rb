@@ -5,6 +5,12 @@ that captures users browsing sessions for Rack applications.
 
 Tribute to [Inspector Columbo](http://www.imdb.com/title/tt1466074/)
 
+## Disclaimer
+
+This is an alpha release, it is tested with Sinatra and Rails 3 only.
+The UI to explore sessions is in progress (ETA: 2013'Q4) therefore
+there is no point using this gem at the moment.
+
 ## Using with Rack application
 
 *Columbo* can be used with any Rack application,
@@ -43,16 +49,11 @@ Check the Rack configuration:
 
     rake middleware
 
-## Disclaimer
-
-This is an alpha release, it is tested with Sinatra and Rails 3 only.
-UI to explore sessions will be completed later (ETA: 2013'Q2).
-
 ## Author
 
 Jerome Touffe-Blin, [@jtblin](https://twitter.com/jtlbin), [http://www.linkedin.com/in/jtblin](http://www.linkedin.com/in/jtblin)
 
 ## License
 
-Columbo is copyright 2012 Jerome Touffe-Blin and contributors. It is licensed under the BSD license. See the include LICENSE file for details.
+Columbo is copyright 2013 Jerome Touffe-Blin and contributors. It is licensed under the BSD license. See the include LICENSE file for details.
 
