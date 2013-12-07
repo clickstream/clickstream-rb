@@ -7,7 +7,7 @@ module Columbo
   class Capture
     include Rack::Utils
 
-    attr_reader :client
+    attr_reader :client, :filter_params, :filter_uri
 
     FORMAT = %{[Columbo #{Columbo::VERSION}] [%s] %s - %s "%s%s %s\n}
 
@@ -20,10 +20,11 @@ module Columbo
       crawlers          = opts[:crawlers] || "(Baidu|Gigabot|Googlebot|libwww-perl|lwp-trivial|msnbot|SiteUptime|Slurp|WordPress|ZIBB|ZyBorg|bot|crawler|spider|robot|crawling|facebook|w3c|coccoc|Daumoa|panopta)"
       api_key           = opts[:api_key]
       api_uri           = opts[:api_uri]
-      filter_params     = opts[:filter_parameters] || []
+      @filter_params    = opts[:filter_params] || []
+      @filter_uri       = opts[:filter_uri] || []
 
-      @cookie_name = 'columbo'
-      filter_params = Rails.configuration.filter_parameters || [] if defined? Rails
+      @cookie_name = 'clickstream.io'
+      filter_params.concat(Rails.configuration.filter_parameters || []) if defined?(Rails)
 
       Columbo.logger = opts[:logger] if opts[:logger]
 
@@ -49,23 +50,25 @@ module Columbo
 
       headers = HeaderHash.new(headers)
 
-      if !STATUS_WITH_NO_ENTITY_BODY.include?(status) && !headers['transfer-encoding'] && headers['content-type'] && (
+      if @capture && !STATUS_WITH_NO_ENTITY_BODY.include?(status) && !headers['transfer-encoding'] && headers['content-type'] && (
         headers['content-type'].include?('text/html') || headers['content-type'].include?('application/json') ||
-            headers['content-type'].include?('application/xml') || headers['content-type'].include?('text/javascript')
-      )
+            headers['content-type'].include?('application/xml') || headers['content-type'].include?('text/javascript') ||
+            headers['content-type'].include?('text/plain')
+      ) && !filtered_uri?(env['REQUEST_URI'])
 
         cookie = session_cookie(env, headers)
         pid = SecureRandom.uuid
+        body = response.clone
 
-        Thread.abort_on_exception = true
+        Thread.abort_on_exception = false
         Thread.new do
           begin
-            result = @inspector.investigate env, status, headers, response.clone, start_processing, stop_processing, cookie, pid
+            result = @inspector.investigate env, status, headers, body, start_processing, stop_processing, cookie, pid
             log env, result
           rescue Exception => e
             log_error env, e
           end
-        end if @capture
+        end
 
         response = insert_js(response, headers, cookie, pid) if headers['content-type'].include?('text/html') #&& headers['content-length'].to_i > 0
       end
@@ -74,8 +77,6 @@ module Columbo
         stop = Time.now
         duration = ((stop-start) * 1000).round(3)
         headers['Columbo'] = "version #{Columbo::VERSION}, time #{duration}ms"
-
-        Thread.abort_on_exception = false
         Thread.new { log(env, "Time: #{duration}ms") }
       end
 
@@ -83,6 +84,10 @@ module Columbo
     end
 
     private
+
+    def filtered_uri?(uri)
+      filter_uri.select {|filter| uri.match filter}.size > 0
+    end
 
     def session_cookie(env, headers)
       cookie = extract_cookie(env['HTTP_COOKIE'])
@@ -107,8 +112,9 @@ module Columbo
       html = ''
       body.each { |part| html += part }
       body.close if body.respond_to?(:close)
+      str_filter_params = filter_params.map { |filter| filter.to_s }
       if html.size > 0
-        script = "<script>(function(){var uri='#{client['ws']}', cid='#{client['clientId']}', sid='#{sid}', pid='#{pid}';#{client['js']}})();</script>"
+        script = "<script>(function(){var uri='#{client['ws']}', cid='#{client['clientId']}', sid='#{sid}', pid='#{pid}', paramsFilter = #{str_filter_params}; #{client['js']}})();</script>"
         html += "\n" + script
       end
       headers['content-length'] = html.size.to_s

@@ -22,8 +22,8 @@ simply require and use as follows:
     require 'columbo/capture'
     use Columbo::Capture, {
       capture: true,
-      bench: false,
-      apy_key: 'your-private-api-key',
+      bench: true,
+      api_key: 'your-private-api-key',
       logger: 'log/columbo.log'
     }
     run app
@@ -31,23 +31,35 @@ simply require and use as follows:
 ## Using with Rails 3
 
 In order to use, include the following in a Rails application
-*Gemfile* file:
+**Gemfile** file:
 
     gem 'columbo'
 
-*config/application.rb* file:
+**config/application.rb** file:
 
     require 'columbo/capture'
     config.middleware.insert 0, Columbo::Capture, {
       capture: Rails.env.production?,
-      bench: false,
-      apy_key: 'your-private-api-key',
-      logger: 'log/columbo.log'
+      api_key: 'your-private-api-key',
+      logger: 'log/columbo.log',
+      filter_uri: ['admin']
     }
 
 Check the Rack configuration:
 
     rake middleware
+
+## Options
+
+- `api_key`: the api key for authentication (mandatory),
+- `capture`: set to true to collect data, default `false`
+- `bench`: set to true to benchmark middleware overhead, default `false`
+- `logger`: file to write logs to, default `env['rack.errors']`
+- `capture_crawlers`: set to true to capture hits from crawlers, default `false`
+- `api_uri`: overwrite api endpoint uri
+- `crawlers`: overwrite crawlers user agent regex
+- `filter_params`: array of parameters to filter, for `Rails` default to `Rails.configuration.filter_parameters`
+- `filter_uri`: array of uri for which **not** to capture data
 
 ## Author
 

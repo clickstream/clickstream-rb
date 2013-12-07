@@ -1,33 +1,36 @@
 require 'rack/request'
 require 'rack/response'
+require 'socket'
 
 module Columbo
   class Inspector
 
-    def initialize(api_key, api_uri, crawlers, capture_crawlers, filter_parameters)
+    def initialize(api_key, api_uri, crawlers, capture_crawlers, filter_params)
       @client = Columbo::APIClient.new(api_key, api_uri)
-      @crawlers, @capture_crawlers, @filter_parameters = crawlers, capture_crawlers, filter_parameters
+      @crawlers, @capture_crawlers, @filter_params = crawlers, capture_crawlers, filter_params
+      @hostname = Socket.gethostname
+      @rg = Regexp.new(crawlers, Regexp::IGNORECASE)
     end
 
     def investigate(env, status, headers, body, start, stop, cookie, pid)
       # Normalise request from env
       request = Rack::Request.new(env)
       # Don't capture bots traffic by default
-      rg = Regexp.new(@crawlers, Regexp::IGNORECASE)
-      return if request.user_agent.match(rg) && !@capture_crawlers
+      return unless @capture_crawlers || !request.user_agent.match(@rg)
       html = ''
       # in case of gzipping has been done by the app
       body.each { |part| html += Columbo::Compressor.unzip(part, headers['Content-Encoding']) }
       request_headers = {}
       request.env.each { |key, value| request_headers[key.sub(/^HTTP_/, '').gsub(/_/, '-').downcase] = value if key.start_with? 'HTTP_'}
       params = request.params.clone || {}
-      @filter_parameters.each {|param| params[param] = '[FILTERED]' if params[param]}
+      @filter_params.each {|param| params[param.to_s] = '[FILTERED]' if params[param.to_s]}
       session_opts = request.session_options.clone || {}
       session_opts.delete :secret
       data = {
           sid: cookie,
           pid: pid,
-          filters: @filter_parameters,
+          hostname: @hostname,
+          filter_params: @filter_params,
           request: {
               params: params,
               ip: request.ip,
@@ -45,8 +48,6 @@ module Columbo
               port: request.port,
               url: request.url, # base_url + fullpath
               base_url: request.base_url, # scheme + host [+ port]
-              server_name: request.env['SERVER_NAME'],
-              server_port: request.env['SERVER_PORT'],
               content_type: request.content_type,
               content_charset: request.content_charset,
               media_type: request.media_type,
