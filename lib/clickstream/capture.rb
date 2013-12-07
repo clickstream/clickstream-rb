@@ -10,6 +10,8 @@ module Clickstream
     attr_reader :client, :filter_params, :filter_uri
 
     FORMAT = %{[Clickstream #{Clickstream::VERSION}] [%s] %s - %s "%s%s %s\n}
+    COOKIE_NAME = 'clickstream.io'.freeze
+    COOKIE_REGEX = Regexp.new("#{COOKIE_NAME}=([^;]*)").freeze
 
     def initialize(app, opts={})
       @app = app
@@ -23,7 +25,6 @@ module Clickstream
       @filter_params    = opts[:filter_params] || []
       @filter_uri       = opts[:filter_uri] || []
 
-      @cookie_name = 'clickstream.io'
       filter_params.concat(Rails.configuration.filter_parameters || []) if defined?(Rails)
 
       Clickstream.logger = opts[:logger] if opts[:logger]
@@ -31,7 +32,6 @@ module Clickstream
       raise ArgumentError, 'API key missing.' if api_key.nil?
 
       @inspector = Clickstream::Inspector.new api_key, api_uri, crawlers, capture_crawlers, filter_params
-      @cookie_regex = Regexp.new "#{@cookie_name}="
 
       @client = {}
       Clickstream::APIClient.new(api_key, api_uri).handshake { |k, v| @client[k] = v}
@@ -96,7 +96,7 @@ module Clickstream
 
     def extract_cookie(string)
       return unless string
-      match = string.match(/clickstream=([^;]*)/)
+      match = string.match(COOKIE_REGEX)
       match[1] if match && match.length > 1
     end
 
@@ -104,7 +104,7 @@ module Clickstream
       expires = Time.now+60*60
       cookie = cookie.nil? ? {value: SecureRandom.uuid} : {value: cookie}
       cookie[:expires] = expires
-      Rack::Utils.set_cookie_header!(headers, @cookie_name, cookie)
+      Rack::Utils.set_cookie_header!(headers, COOKIE_NAME, cookie)
       cookie[:value]
     end
 
