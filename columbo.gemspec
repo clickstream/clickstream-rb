@@ -4,7 +4,8 @@ require File.expand_path('../lib/columbo/version', __FILE__)
 Gem::Specification.new do |s|
   s.name = %q{columbo}
   s.version = Columbo::VERSION
-  s.platform    = Gem::Platform::RUBY
+  s.platform = Gem::Platform::RUBY
+  s.license = %q{BSD}
   s.authors = ["Jerome Touffe-Blin"]
   s.email = %q{jtblin@gmail.com}
   s.homepage = %q{http://github.com/jtblin/columbo-rb}
