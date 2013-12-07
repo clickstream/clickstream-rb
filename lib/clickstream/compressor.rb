@@ -1,7 +1,7 @@
 require 'stringio'
 require 'zlib'
 
-module Columbo
+module Clickstream
   class Compressor
 
     def self.encoding_handled?(content_encoding)

@@ -2,11 +2,11 @@ require 'rack/request'
 require 'rack/response'
 require 'socket'
 
-module Columbo
+module Clickstream
   class Inspector
 
     def initialize(api_key, api_uri, crawlers, capture_crawlers, filter_params)
-      @client = Columbo::APIClient.new(api_key, api_uri)
+      @client = Clickstream::APIClient.new(api_key, api_uri)
       @crawlers, @capture_crawlers, @filter_params = crawlers, capture_crawlers, filter_params
       @hostname = Socket.gethostname
       @rg = Regexp.new(crawlers, Regexp::IGNORECASE)
@@ -19,7 +19,7 @@ module Columbo
       return unless @capture_crawlers || !request.user_agent.match(@rg)
       html = ''
       # in case of gzipping has been done by the app
-      body.each { |part| html += Columbo::Compressor.unzip(part, headers['Content-Encoding']) }
+      body.each { |part| html += Clickstream::Compressor.unzip(part, headers['Content-Encoding']) }
       request_headers = {}
       request.env.each { |key, value| request_headers[key.sub(/^HTTP_/, '').gsub(/_/, '-').downcase] = value if key.start_with? 'HTTP_'}
       params = request.params.clone || {}

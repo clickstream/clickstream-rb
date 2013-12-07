@@ -1,6 +1,6 @@
 require 'logger'
 
-module Columbo
+module Clickstream
 
   class LogWriter < Logger
     def initialize(log = STDOUT)

@@ -1,6 +1,6 @@
 require 'rake'
 require 'rake/testtask'
-require File.expand_path('../lib/columbo/version', __FILE__)
+require File.expand_path('../lib/clickstream/version', __FILE__)
 
 Rake::TestTask.new(:test) do |test|
   # TODO: add tests
@@ -10,11 +10,11 @@ Rake::TestTask.new(:test) do |test|
 end
 
 task :build do
-  system "gem build columbo.gemspec"
+  system "gem build clickstream.gemspec"
 end
 
 task :install => :build do
-  system "gem install --no-ri --no-rdoc columbo-#{Columbo::VERSION}.gem"
+  system "gem install --no-ri --no-rdoc clickstream-#{Clickstream::VERSION}.gem"
 end
 
 task :server do
@@ -22,7 +22,7 @@ task :server do
 end
 
 task :release => :build do
-  system "gem push columbo-#{Columbo::VERSION}.gem"
+  system "gem push clickstream-#{Clickstream::VERSION}.gem"
 end
 
 task :default => :test

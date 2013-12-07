@@ -1,15 +1,15 @@
-require 'columbo'
+require 'clickstream'
 require 'rack/utils'
 require 'rack/logger'
 require 'securerandom'
 
-module Columbo
+module Clickstream
   class Capture
     include Rack::Utils
 
     attr_reader :client, :filter_params, :filter_uri
 
-    FORMAT = %{[Columbo #{Columbo::VERSION}] [%s] %s - %s "%s%s %s\n}
+    FORMAT = %{[Clickstream #{Clickstream::VERSION}] [%s] %s - %s "%s%s %s\n}
 
     def initialize(app, opts={})
       @app = app
@@ -26,15 +26,15 @@ module Columbo
       @cookie_name = 'clickstream.io'
       filter_params.concat(Rails.configuration.filter_parameters || []) if defined?(Rails)
 
-      Columbo.logger = opts[:logger] if opts[:logger]
+      Clickstream.logger = opts[:logger] if opts[:logger]
 
       raise ArgumentError, 'API key missing.' if api_key.nil?
 
-      @inspector = Columbo::Inspector.new api_key, api_uri, crawlers, capture_crawlers, filter_params
+      @inspector = Clickstream::Inspector.new api_key, api_uri, crawlers, capture_crawlers, filter_params
       @cookie_regex = Regexp.new "#{@cookie_name}="
 
       @client = {}
-      Columbo::APIClient.new(api_key, api_uri).handshake { |k, v| @client[k] = v}
+      Clickstream::APIClient.new(api_key, api_uri).handshake { |k, v| @client[k] = v}
     end
 
     def call(env)
@@ -76,7 +76,7 @@ module Columbo
       if @bench
         stop = Time.now
         duration = ((stop-start) * 1000).round(3)
-        headers['Columbo'] = "version #{Columbo::VERSION}, time #{duration}ms"
+        headers['Clickstream'] = "version #{Clickstream::VERSION}, time #{duration}ms"
         Thread.new { log(env, "Time: #{duration}ms") }
       end
 
@@ -96,7 +96,7 @@ module Columbo
 
     def extract_cookie(string)
       return unless string
-      match = string.match(/columbo=([^;]*)/)
+      match = string.match(/clickstream=([^;]*)/)
       match[1] if match && match.length > 1
     end
 
@@ -124,7 +124,7 @@ module Columbo
     def log(env, message)
       now = Time.now
 
-      logger = Columbo.logger || env['rack.errors']
+      logger = Clickstream.logger || env['rack.errors']
 
       logger.write FORMAT % [
           now.strftime('%d-%b-%Y %H:%M:%S'),
@@ -138,7 +138,7 @@ module Columbo
 
     def log_error(env, exception)
       begin
-        logger = Columbo.logger || env['rack.errors']
+        logger = Clickstream.logger || env['rack.errors']
         log env, "Error: " + exception.message
         logger.write "#{exception.backtrace.join("\n")}\n"
       end

@@ -1,7 +1,7 @@
 require 'net/http'
 require 'json'
 
-module Columbo
+module Clickstream
   class APIClient
 
     API_URI = "http://localhost:15080".freeze
@@ -31,7 +31,7 @@ module Columbo
           "Content-Type" => "application/json; charset=utf-8"
       }
 
-      zlib = Columbo::Compressor
+      zlib = Clickstream::Compressor
       json = hash.merge({api_key: @api_key}).to_json
       payload = zlib.deflate(json)
       uri = URI(@api_uri + '/' + @api_key + '/capture')

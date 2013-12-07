@@ -1,12 +1,11 @@
 require 'sinatra'
-require 'columbo/capture'
+require 'clickstream/capture'
 require 'lorem'
 
-use Columbo::Capture, {
+use Clickstream::Capture, {
   capture: true,
-  #api_key: "23dd4ff5-3404-4647-abf5-d63f9e776ffe",
-  api_key: "1234",
-  logger: 'log/columbo.log',
+  api_key: "23dd4ff5-3404-4647-abf5-d63f9e776ffe",
+  logger: 'log/clickstream.log',
   bench: true
 }
 
