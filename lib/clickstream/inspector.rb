@@ -67,7 +67,7 @@ module Clickstream
               body: html,
               start: start,
               stop: stop,
-              time: stop-start
+              time: (stop-start)*1000
           }
       }
       # Send data to API
