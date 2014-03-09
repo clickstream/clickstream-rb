@@ -10,7 +10,7 @@ module Clickstream
     attr_reader :client, :filter_params, :filter_uri
 
     FORMAT = %{[Clickstream #{Clickstream::VERSION}] [%s] %s - %s "%s%s %s\n}
-    COOKIE_NAME = 'clickstream.io'.freeze
+    COOKIE_NAME = 'clickstream-io'.freeze
     COOKIE_REGEX = Regexp.new("#{COOKIE_NAME}=([^;]*)").freeze
 
     def initialize(app, opts={})
@@ -24,6 +24,8 @@ module Clickstream
       api_uri           = opts[:api_uri]
       @filter_params    = opts[:filter_params] || []
       @filter_uri       = opts[:filter_uri] || []
+
+      return unless @capture
 
       filter_params.concat(Rails.configuration.filter_parameters || []) if defined?(Rails)
 
@@ -52,8 +54,7 @@ module Clickstream
 
       if @capture && !STATUS_WITH_NO_ENTITY_BODY.include?(status) && !headers['transfer-encoding'] && headers['content-type'] && (
         headers['content-type'].include?('text/html') || headers['content-type'].include?('application/json') ||
-            headers['content-type'].include?('application/xml') || headers['content-type'].include?('text/javascript') ||
-            headers['content-type'].include?('text/plain')
+            headers['content-type'].include?('application/xml') || headers['content-type'].include?('text/plain')
       ) && !filtered_uri?(env['REQUEST_URI'])
 
         cookie = session_cookie(env, headers)
@@ -76,7 +77,7 @@ module Clickstream
       if @bench
         stop = Time.now
         duration = ((stop-start) * 1000).round(3)
-        headers['Clickstream'] = "version #{Clickstream::VERSION}, time #{duration}ms"
+        headers['clickstream.io'] = "version #{Clickstream::VERSION}, time #{duration}ms"
         Thread.new { log(env, "Time: #{duration}ms") }
       end
 
@@ -112,9 +113,9 @@ module Clickstream
       html = ''
       body.each { |part| html += part }
       body.close if body.respond_to?(:close)
-      str_filter_params = filter_params.map { |filter| filter.to_s }
+      js_filter_params = filter_params.map { |filter| filter.to_s }
       if html.size > 0
-        script = "<script>(function(){var uri='#{client['ws']}', cid='#{client['clientId']}', sid='#{sid}', pid='#{pid}', paramsFilter = #{str_filter_params}; #{client['js']}})();</script>"
+        script = "<script>(function(){var uri='#{client['ws']}', cid='#{client['clientId']}', sid='#{sid}', pid='#{pid}', paramsFilter = #{js_filter_params}; #{client['js']}})();</script>"
         html += "\n" + script
       end
       headers['content-length'] = html.size.to_s

@@ -47,12 +47,12 @@ Check the Rack configuration:
 
 ## Options
 
-- `api_key`: the api key for authentication (mandatory),
+- `api_key`: the api key for authentication (mandatory)
+- `api_uri`: overwrite api uri endpoint
 - `capture`: set to true to collect data, default `false`
 - `bench`: set to true to benchmark middleware overhead, default `false`
 - `logger`: file to write logs to, default `env['rack.errors']`
 - `capture_crawlers`: set to true to capture hits from crawlers, default `false`
-- `api_uri`: overwrite api endpoint uri
 - `crawlers`: overwrite crawlers user agent regex
 - `filter_params`: array of parameters to filter, for `Rails` default to `Rails.configuration.filter_parameters`
 - `filter_uri`: array of uri for which **not** to capture data

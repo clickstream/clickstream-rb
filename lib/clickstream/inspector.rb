@@ -37,7 +37,7 @@ module Clickstream
               user_agent: request.user_agent,
               referer: request.referer,
               method: request.request_method,
-              path: request.path, # script_name + path_info
+              #path: request.path, # script_name + path_info
               fullpath: request.fullpath, # "#{path}?#{query_string}"
               script_name: request.script_name,
               path_info: request.path_info,

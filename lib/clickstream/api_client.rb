@@ -4,7 +4,7 @@ require 'json'
 module Clickstream
   class APIClient
 
-    API_URI = "http://localhost:15080".freeze
+    API_URI = 'http://api.clickstream.io'.freeze
 
     def initialize(api_key, api_uri)
       @api_key = api_key
