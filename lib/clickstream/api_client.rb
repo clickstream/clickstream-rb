@@ -4,7 +4,7 @@ require 'json'
 module Clickstream
   class APIClient
 
-    API_URI = 'http://api.clickstream.io'.freeze
+    API_URI = 'https://clickstream-api.herokuapp.com'.freeze
 
     def initialize(api_key, api_uri)
       @api_key = api_key
