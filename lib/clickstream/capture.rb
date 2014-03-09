@@ -102,7 +102,7 @@ module Clickstream
 
     def set_cookie(headers, cookie)
       expires = Time.now+60*60
-      cookie = cookie.nil? ? {value: SecureRandom.uuid} : {value: cookie}
+      cookie = cookie.nil? ? {value: SecureRandom.uuid} : {value: cookie, path: '/'}
       cookie[:expires] = expires
       Rack::Utils.set_cookie_header!(headers, COOKIE_NAME, cookie)
       cookie[:value]
